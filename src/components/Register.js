@@ -55,52 +55,49 @@ const Register = () => {
    */
 
   const register = async (e) => {
-    setIsLoading(true);
     e.preventDefault();
     if (!validateInput()) return;
+    setIsLoading(false);
     const newUser = {
       username,
       password,
     }
 
+    const configApp = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
 
 
-    try {
-      const configApp = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-
-
-      const body = JSON.stringify(newUser);
-      const res = await axios.post(config.endpoint + "/auth/register", body, configApp);
-      if(res.status === 201){
-        setIsLoading(false);
-        setSuccess(true)
-        console.log(res.data);
-        return res.data
-      }
+    const body = JSON.stringify(newUser);
     
+    try {
+      setIsLoading(false);
+      const res = await axios.post(config.endpoint + "/auth/register", body, configApp);
+      console.log(res.data);
+      enqueueSnackbar("Registration Successfully done", { variant: "success" })
+      setFormData({
+        username: "",
+        password: "",
+        confirmPassword: ""
+      })
+      setSuccess(true);
+      return res.data
     } catch (err) {
-      if(err.response.status === 400) {
-        setSuccess(false)
-        enqueueSnackbar(err.response.data, { variant: "error" })
-        console.error(err.response.data);
-        return err.response.data
+      setIsLoading(false);
+      setSuccess(false);
+      if (err.response && err.response.status === 400) {
+        enqueueSnackbar("Username is already taken", { variant: 'error' });
+      } else {
+        enqueueSnackbar("Something went wrong!", { variant: 'error' });
       }
-      
-      
+
+      // console.log(err.response.data.message);
+      // enqueueSnackbar(err.response.data.message, { variant: "error" })
+      //return err.response.data
     }
 
-
-
-    // try {
-    //   const response = await axios.post(config.endpoint + "/auth/register", userdata)
-    //   console.log(response);
-    // }catch(error) {
-    //   return error
-    // }
 
   };
 
@@ -140,11 +137,10 @@ const Register = () => {
     } else if (password !== confirmPassword) {
       enqueueSnackbar("Passwords do not match", { variant: "error" })
     } else {
-      enqueueSnackbar("Registration Successfully done", { variant: "success" })
+      // setSuccess(true)
+      // enqueueSnackbar("Registration Successfully done", { variant: "success" })
+      return true
     }
-
-
-    return formData
   };
 
   const handleChange = (e) => {
@@ -152,7 +148,7 @@ const Register = () => {
 
   }
 
-  
+
 
   return (
     <>
@@ -201,11 +197,11 @@ const Register = () => {
               value={confirmPassword}
               onChange={handleChange}
             />
-            {isLoading ? <div className="loading"><CircularProgress /></div> : 
-            <Button className="button" variant="contained" onClick={register}>
-              Register Now
-            </Button>}
-            
+            {isLoading ? <div className="loading"><CircularProgress /></div> :
+              <Button className="button" variant="contained" onClick={register}>
+                Register Now
+              </Button>}
+
             <p className="secondary-action">
               Already have an account?{" "}
               <a className="link" href="#!">
