@@ -9,8 +9,20 @@ import Footer from "./Footer";
 import Header from "./Header";
 import "./Login.css";
 
+
+
 const Login = () => {
+  let history = useHistory();
   const { enqueueSnackbar } = useSnackbar();
+  const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false)
+
+  const [formData, setFormData] = useState({
+    username: "",
+    password: ""
+  })
+
+  // const { username, password } = formData
 
   // TODO: CRIO_TASK_MODULE_LOGIN - Fetch the API response
   /**
@@ -37,7 +49,48 @@ const Login = () => {
    * }
    *
    */
-  const login = async (formData) => {
+  const login = async () => {
+    // e.preventDefault();
+    if (!validateInput()) return;
+    setIsLoading(true);
+    const { username, password } = formData
+    const newUser = {
+      username,
+      password,
+    }
+
+    const configApp = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+
+    //const body = JSON.stringify(newUser);
+
+
+    try {
+      const res = await axios.post(config.endpoint + "/auth/login", newUser);
+      console.log(res.data);
+      //if (res.data.success === true) {
+      setIsLoading(false);
+      setSuccess(true);
+      enqueueSnackbar("Logged in successfully", { variant: "success" })
+      persistLogin(res.data.token, res.data.username, res.data.balance)
+      history.push('/')
+      return res.data
+      //}
+
+
+    } catch (err) {
+      setIsLoading(false);
+      setSuccess(false);
+      if (err.response && err.response.status === 400) {
+        enqueueSnackbar("Password is incorrect", { variant: 'error' });
+      } else {
+        enqueueSnackbar("Something went wrong!", { variant: 'error' });
+      }
+    }
   };
 
   // TODO: CRIO_TASK_MODULE_LOGIN - Validate the input
@@ -55,8 +108,27 @@ const Login = () => {
    * -    Check that username field is not an empty value - "Username is a required field"
    * -    Check that password field is not an empty value - "Password is a required field"
    */
-  const validateInput = (data) => {
+  const validateInput = () => {
+    const { username, password } = formData
+    if (username === "") {
+      enqueueSnackbar("Username is a required field", { variant: "error" })
+    } else if (username.length < 6) {
+      enqueueSnackbar("Username must be at least 6 characters", { variant: "error" })
+    } else if (password === "") {
+      enqueueSnackbar("Password is a required field", { variant: "error" })
+    } else if (password.length < 6) {
+      enqueueSnackbar("Password must be at least 6 characters", { variant: "error" })
+    } else {
+      return true
+    }
   };
+
+  const handleChange = (e) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      [e.target.name]: e.target.value,
+    }))
+  }
 
   // TODO: CRIO_TASK_MODULE_LOGIN - Persist user's login information
   /**
@@ -75,7 +147,12 @@ const Login = () => {
    * -    `balance` field in localStorage can be used to store the balance amount in the user's wallet
    */
   const persistLogin = (token, username, balance) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("username", username);
+    localStorage.setItem("balance", balance);
   };
+
+  const { username, password } = formData
 
   return (
     <Box
@@ -84,9 +161,50 @@ const Login = () => {
       justifyContent="space-between"
       minHeight="100vh"
     >
-      <Header hasHiddenAuthButtons />
+      <Header hasHiddenAuthButtons={true}/>
       <Box className="content">
         <Stack spacing={2} className="form">
+          <h2 className="title">Login</h2>
+          <TextField
+            id="username"
+            label="Username"
+            variant="outlined"
+            title="Username"
+            name="username"
+            value={username}
+            onChange={handleChange}
+            required
+            placeholder="Enter Username"
+            fullWidth
+
+          />
+          <TextField
+            id="password"
+            variant="outlined"
+            label="Password"
+            name="password"
+            type="password"
+            value={password}
+            onChange={handleChange}
+            helperText="Password must be atleast 6 characters length"
+            fullWidth
+            required
+            placeholder="Enter a password with minimum 6 characters"
+          />
+
+          {isLoading ? <div className="loading"><CircularProgress /></div> :
+            <Button className="button" variant="contained" onClick={login}>
+              Login to QKart
+            </Button>
+          }
+
+
+          <p className="secondary-action">
+            Don't have account?{" "}
+            <Link className="link" to="/register">
+              Register Now
+            </Link>
+          </p>
         </Stack>
       </Box>
       <Footer />

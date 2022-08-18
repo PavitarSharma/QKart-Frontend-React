@@ -7,10 +7,13 @@ import { config } from "../App";
 import Footer from "./Footer";
 import Header from "./Header";
 import "./Register.css";
+import { Link, useHistory } from "react-router-dom"
 
 const Register = () => {
+  const history = useHistory()
   const { enqueueSnackbar } = useSnackbar();
   const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line
   const [success, setSuccess] = useState(false)
 
   // const initialState = {
@@ -57,7 +60,6 @@ const Register = () => {
   const register = async (e) => {
     e.preventDefault();
     if (!validateInput()) return;
-    setIsLoading(false);
     const newUser = {
       username,
       password,
@@ -70,11 +72,11 @@ const Register = () => {
     };
 
 
-    const body = JSON.stringify(newUser);
+    // const body = JSON.stringify(newUser);
     
+    setIsLoading(true);
     try {
-      setIsLoading(false);
-      const res = await axios.post(config.endpoint + "/auth/register", body, configApp);
+      const res = await axios.post(config.endpoint + "/auth/register", newUser);
       console.log(res.data);
       enqueueSnackbar("Registration Successfully done", { variant: "success" })
       setFormData({
@@ -82,8 +84,12 @@ const Register = () => {
         password: "",
         confirmPassword: ""
       })
-      setSuccess(true);
-      return res.data
+      // if (res.data.success === true) {
+        setIsLoading(false);
+        setSuccess(true);
+        history.push("/login")
+        return res.data
+      // }
     } catch (err) {
       setIsLoading(false);
       setSuccess(false);
@@ -159,7 +165,7 @@ const Register = () => {
         minHeight="100vh"
 
       >
-        <Header hasHiddenAuthButtons />
+        <Header hasHiddenAuthButtons={true} />
         <Box className="content">
           <Stack spacing={2} className="form">
             <h2 className="title">Register</h2>
@@ -198,15 +204,15 @@ const Register = () => {
               onChange={handleChange}
             />
             {isLoading ? <div className="loading"><CircularProgress /></div> :
-              <Button className="button" variant="contained" onClick={register}>
+              <Button variant="contained" onClick={register}>
                 Register Now
               </Button>}
 
             <p className="secondary-action">
               Already have an account?{" "}
-              <a className="link" href="#!">
+              <Link className="link" to="/login">
                 Login here
-              </a>
+              </Link>
             </p>
           </Stack>
         </Box>

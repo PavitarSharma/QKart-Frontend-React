@@ -20,13 +20,9 @@ const Products = () => {
 
 
 
-
-
-
-
   return (
     <div>
-      <Header>
+      <Header hasHiddenAuthButtons={false}>
 
       </Header>
 
