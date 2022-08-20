@@ -15,6 +15,8 @@ const Login = () => {
   let history = useHistory();
   const { enqueueSnackbar } = useSnackbar();
   const [isLoading, setIsLoading] = useState(false);
+  
+  // eslint-disable-next-line
   const [success, setSuccess] = useState(false)
 
   const [formData, setFormData] = useState({
@@ -59,6 +61,7 @@ const Login = () => {
       password,
     }
 
+    // eslint-disable-next-line
     const configApp = {
       headers: {
         "Content-Type": "application/json",

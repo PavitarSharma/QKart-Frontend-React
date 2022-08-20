@@ -3,8 +3,6 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import { SnackbarProvider } from "notistack";
-import { ThemeProvider } from "@emotion/react";
-import theme from "./theme";
 import { BrowserRouter } from "react-router-dom"
 
 // TODO: CRIO_TASK_MODULE_REGISTER - Add Target container ID (refer public/index.html)

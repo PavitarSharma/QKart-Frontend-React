@@ -65,6 +65,7 @@ const Register = () => {
       password,
     }
 
+    // eslint-disable-next-line
     const configApp = {
       headers: {
         "Content-Type": "application/json",

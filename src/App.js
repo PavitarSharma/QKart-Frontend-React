@@ -5,9 +5,9 @@ import Register from "./components/Register";
 import Product from "./components/Products"
 import ipConfig from "./ipConfig.json";
 import theme from "./theme";
+// eslint-disable-next-line
 import React, { useEffect, useState } from "react"
-import Header from "./components/Header";
-import Footer from "./components/Footer";
+
 
 export const config = {
   endpoint: `http://${ipConfig.workspaceIp}:8082/api/v1`,
