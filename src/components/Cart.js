@@ -4,7 +4,7 @@ import {
   ShoppingCart,
   ShoppingCartOutlined,
 } from "@mui/icons-material";
-import { Button, IconButton, Stack, Typography } from "@mui/material";
+import { Button, IconButton, Stack } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 import { useHistory } from "react-router-dom";
@@ -50,34 +50,33 @@ import "./Cart.css";
 
 
 export const generateCartItemsFrom = (cartData, productsData) => {
-  console.log(cartData, productsData)
+  //console.log(cartData, productsData)
 
-  const productId = cartData.map(item => {
+  const productIds = cartData?.map(item => {
     return item.productId
   })
 
-  const filteredProducts = productsData.filter(product => {
-    return productId.includes(product._id)
+  const filteredProducts = productsData?.filter(product => {
+    return productIds?.includes(product._id)
   })
 
-  const cartItems = filteredProducts.map((data, index) => {
+  const cartItems = filteredProducts?.map((data, index) => {
     return {
       name: data.name,
-      qty: cartData[index].dty,
+      qty: cartData[index].qty,
       category: data.category,
       cost: data.cost,
       rating: data.rating,
       image: data.image,
-      productId: data._id
-    }
+      productId: data._id,
+    };
   })
 
-  console.log(cartItems);
+  //console.log(cartItems);
   return cartItems
-
-
-
 };
+
+
 
 /**
  * Get the total value of all products added to the cart
@@ -89,20 +88,21 @@ export const generateCartItemsFrom = (cartData, productsData) => {
  *    Value of all items in the cart
  *
  */
+
 export const getTotalCartValue = (items = []) => {
   const totalValue = items.reduce((sum, item) => {
-    return sum + item.cost * item.qty
-  }, 0)
+    return sum + item.cost * item.qty;
+  }, 0);
+  return totalValue;
+}
 
-  return totalValue
-};
 
 export const getTotalItems = (items = []) => {
   const totalQty = items.reduce((sum, ele) => {
     return sum + ele.qty;
   }, 0);
   return totalQty;
-};
+}
 
 
 /**
@@ -175,20 +175,20 @@ const Cart = ({
     <>
       <Box className="cart">
         {/* TODO: CRIO_TASK_MODULE_CART - Display view for each cart item with non-zero quantity */}
-        {items.map((ele) => {
+        {items.map((item) => {
           return (
             <Box
               display="flex"
               alignItems="flex-start"
               padding="1rem"
-              key={ele.productId}
+              key={item.productId}
             >
               <Box className="image-container">
                 <img
                   // Add product image
-                  src={ele.image}
+                  src={item.image}
                   // Add product name as alt eext
-                  alt={ele.name}
+                  alt={item.name}
                   width="100%"
                   height="100%"
                 />
@@ -200,7 +200,7 @@ const Cart = ({
                 height="6rem"
                 paddingX="1rem"
               >
-                <div>{/* Add product name */ ele.name}</div>
+                <div>{item.name}</div>
                 <Box
                   display="flex"
                   justifyContent="space-between"
@@ -208,14 +208,14 @@ const Cart = ({
                 >
                   {!isReadOnly ? (
                     <ItemQuantity
-                      value={ele.qty}
+                      value={item.qty}
                       handleAdd={() => {
                         handleQuantity(
                           localStorage.getItem("token"),
                           items,
                           products,
-                          ele.productId,
-                          ele.qty + 1
+                          item.productId,
+                          item.qty + 1
                         );
                       }}
                       handleDelete={() => {
@@ -223,19 +223,19 @@ const Cart = ({
                           localStorage.getItem("token"),
                           items,
                           products,
-                          ele.productId,
-                          ele.qty - 1
+                          item.productId,
+                          item.qty - 1
                         );
                       }}
                     // Add required props by checking implementation
                     />
                   ) : (
                     <Box padding="0.5rem" data-testid="item-qty">
-                      Qty: {ele.qty}
+                      Qty: {item.qty}
                     </Box>
                   )}
                   <Box padding="0.5rem" fontWeight="700">
-                    ${/* Add product cost */ ele.cost}
+                    ${item.cost}
                   </Box>
                 </Box>
               </Box>
@@ -261,6 +261,7 @@ const Cart = ({
             ${getTotalCartValue(items)}
           </Box>
         </Box>
+
         {!isReadOnly && (
           <Box display="flex" justifyContent="flex-end" className="cart-footer">
             <Button
@@ -274,34 +275,10 @@ const Cart = ({
             </Button>
           </Box>
         )}
+       
       </Box>
-      {isReadOnly && (
-        <Box padding="1rem" className="cart">
-          <Typography variant="h5" fontWeight="700" mb={2}>
-            Order Details
-          </Typography>
-          <Box display="flex" justifyContent="space-between" mb={1}>
-            <Typography> Products </Typography>
-            <Typography>{getTotalItems(items)}</Typography>
-          </Box>
-          <Box display="flex" justifyContent="space-between" mb={1}>
-            <Typography>Subtotal</Typography>
-            <Typography>${getTotalCartValue(items)} </Typography>
-          </Box>
-          <Box display="flex" justifyContent="space-between" mb={2}>
-            <Typography>Shipping Charges</Typography>
-            <Typography>$0</Typography>
-          </Box>
-          <Box display="flex" justifyContent="space-between" mb={2}>
-            <Typography variant="h6" fontWeight="700">
-              Total
-            </Typography>
-            <Typography variant="h6" fontWeight="700">
-              ${getTotalCartValue(items) + 0}
-            </Typography>
-          </Box>
-        </Box>
-      )}
+
+     
     </>
   );
 };

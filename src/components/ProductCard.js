@@ -28,7 +28,7 @@ const ProductCard = ({ product, handleAddToCart }) => {
         </Typography>
         <Rating name="read-only" value={product.rating} readOnly />
       </CardContent>
-      <Button variant="contained"> <AddShoppingCartOutlined /> ADD TO CART</Button>
+      <Button variant="contained" onClick={handleAddToCart}> <AddShoppingCartOutlined /> ADD TO CART</Button>
     </Card>
   );
 };

@@ -25,98 +25,94 @@ const Products = () => {
   const { enqueueSnackbar } = useSnackbar()
   const [products, setProducts] = useState([])
   const [isLoading, setIsLoading] = useState(false)
-  const [search, setSearch] = useState("")
-  const [error, setError] = useState("")
   const [debounceTimeout, setDebounceTimeout] = useState(0)
+  const [fetchedCart, setFetchedCart] = useState([])
+  const [cartList, setCartList] = useState([])
 
-  const performAPICall = async (text) => {
+  const performAPICall = async () => {
     try {
-      let url = `${config.endpoint}/products`
-
-      if (text !== "") {
-        url = `${config.endpoint}/products/search?value=${text}`
-      }
-
+      const url = `${config.endpoint}/products`
       const response = await axios.get(url)
       const data = response.data
       setIsLoading(false)
-      setProducts(data)
+      //setProducts(data)
+      return data
     } catch (error) {
       setIsLoading(false)
       setProducts([])
-      setError("No products found")
-      //console.log(error);
+      enqueueSnackbar(error.response.data.message, { variant: "error" });
     }
   }
 
-  useEffect(() => {
-    setIsLoading(true)
-    performAPICall(search)
-  }, [search])
+  const performSearch = async (text) => {
+    let erres = null;
+    try {
+      const url = config.endpoint + `/products/search?value=${text}`;
+      const response = await axios.get(url);
 
-  const performSearch = (e) => {
-    setSearch(e.target.value);
-    // if (timeOutDebounce !== 0) {
-    //   clearTimeout(timeOutDebounce);
-    // }
-    // let timerId = setTimeout(() => performAPICall(e.target.value), 500);
-    // setTimeOutDebounce(timerId);
+      if (response) {
+        return response.data;
+      }
+    } catch (error) {
+      if (error.response) {
+        erres = error.response;
+      } else {
+        console.log(error);
+      }
+    }
+    if (erres)
+      return erres.data;
   };
 
-  const debounceSearch = (event, debounceTimeout) => {
-    performSearch(event)
-    if (debounceTimeout !== 0) {
-      clearTimeout(debounceTimeout);
-    }
-    let timerId = setTimeout(() => performAPICall(event.target.value), 500);
-    setDebounceTimeout(timerId);
-  }
 
-  // const debounceSearch = (event, debounceTimeout) => {
-  //   if (debounceTimeout !== 0) {
-  //     clearTimeout(debounceTimeout);
+
+  // const performSearch = async (text) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${config.endpoint}/products/search?value=${text}`
+  //     );
+  //     if (response.data) {
+  //       setError(false)
+  //       setProducts(response.data);
+  //       return response.data;
+  //     }
+  //   } catch (e) {
+  //     if (e.response.status === 404) {
+  //       setError(true)
+  //       setProducts([]);
+
+
+  //     }
   //   }
-  //   const timeout = setTimeout(async () => {
-  //     setDataArray(await performSearch(event.target.value));
-  //   }, 500);
-  //   setDebounceTimeout(timeout);
   // };
 
 
 
-  /**
-   * Perform the API call to fetch the user's cart and return the response
-   *
-   * @param {string} token - Authentication token returned on login
-   *
-   * @returns { Array.<{ productId: string, qty: number }> | null }
-   *    The response JSON object
-   *
-   * Example for successful response from backend:
-   * HTTP 200
-   * [
-   *      {
-   *          "productId": "KCRwjF7lN97HnEaY",
-   *          "qty": 3
-   *      },
-   *      {
-   *          "productId": "BW0jAAeDJmlZCF8i",
-   *          "qty": 1
-   *      }
-   * ]
-   *
-   * Example for failed response from backend:
-   * HTTP 401
-   * {
-   *      "success": false,
-   *      "message": "Protected route, Oauth2 Bearer token not found"
-   * }
-   */
+  // const debounceSearch = (event, debounceTimeout) => {
+  //   performSearch(event)
+  //   if (debounceTimeout !== 0) {
+  //     clearTimeout(debounceTimeout);
+  //   }
+  //   let timerId = setTimeout(() => performSearch(event.target.value), 500);
+  //   setDebounceTimeout(timerId);
+  // }
+
+  const debounceSearch = (event, debounceTimeout) => {
+    if (debounceTimeout !== 0) {
+      clearTimeout(debounceTimeout);
+    }
+    const timeout = setTimeout(async () => {
+      setProducts(await performSearch(event.target.value));
+    }, 500);
+    setDebounceTimeout(timeout);
+  };
+
+
   const fetchCart = async (token) => {
     if (!token) return;
 
     try {
-      token = localStorage.getItem("token")
+
       const response = await axios.get(config.endpoint + "/cart", {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -125,7 +121,9 @@ const Products = () => {
 
       const data = response.data
 
-      console.log(data);
+      //console.log(data);
+
+      return data
       // TODO: CRIO_TASK_MODULE_CART - Pass Bearer token inside "Authorization" header to get data from "GET /cart" API and return the response data
     } catch (e) {
       if (e.response && e.response.status === 400) {
@@ -144,10 +142,27 @@ const Products = () => {
 
 
 
-  // useEffect(() => {
-  //   setIsLoading(true)
-  //   performAPICall(search)
-  // }, [search])
+
+  useEffect(() => {
+    // code to run after render goes here
+    const callApi = async () => {
+      setIsLoading(true)
+      const getProducts = await performAPICall();
+      setIsLoading(false)
+      setProducts(getProducts);
+      // if (localStorage.getItem('username')) {
+      //   const getCart = await fetchCart(localStorage.getItem("token"))
+      //   setFetchedCart(getCart)
+      //   setCartList(generateCartItemsFrom(getCart, getProducts))
+      // }
+      const getCart = await fetchCart(localStorage.getItem("token"))
+      setFetchedCart(getCart)
+      setCartList(generateCartItemsFrom(getCart, getProducts))
+      // console.log("inside useeffect",fetchedcart,res)
+    };
+    callApi();
+
+  }, []);
 
 
   // TODO: CRIO_TASK_MODULE_CART - Return if a product already exists in the cart
@@ -214,16 +229,16 @@ const Products = () => {
     qty,
     options = { preventDuplicate: false }
   ) => {
-    /*try {
+    try {
       // console.log(token,items,products,productId,qty,options)
       if (!token) {
         enqueueSnackbar("Login to add an item to the Cart", {
-          variant: "error",
+          variant: "warning",
         });
       } else if (options.preventDuplicate && isItemInCart(items, productId)) {
         enqueueSnackbar(
           "Item already in cart. Use the cart sidebar to update quantity or remove item.",
-          { variant: "error" }
+          { variant: "warning" }
         );
       } else {
         //console.log(token,items,products,productId,qty,options)
@@ -234,16 +249,16 @@ const Products = () => {
             headers: { Authorization: "Bearer " + token }
           }
         );
-        //console.log(res.data)
-        setFetchedcart(res.data);
+
+        setFetchedCart(res.data);
         setCartList(generateCartItemsFrom(res.data, products));
-        // console.log("inside useeffect",fetchedcart,res)
+
       }
-    } catch (e) {
-      if (e.response) {
-        enqueueSnackbar(e.response.data.message, { variant: "error" });
+    } catch (error) {
+      if (error.response && error.response.status === 400) {
+        enqueueSnackbar(error.response.data.message, { variant: "error" });
       }
-    }*/
+    }
   };
 
 
@@ -270,7 +285,7 @@ const Products = () => {
               }}
               placeholder="Search for items/categories"
               name="search"
-              value={search}
+              //value={search}
               onChange={(e) => {
                 debounceSearch(e, debounceTimeout);
               }}
@@ -294,7 +309,7 @@ const Products = () => {
         }}
         placeholder="Search for items/categories"
         name="search"
-        value={search}
+        //value={search}
         onChange={(e) => {
           debounceSearch(e, debounceTimeout);
         }}
@@ -320,23 +335,40 @@ const Products = () => {
                   <CircularProgress />
                   <Typography variant="p" sx={{ marginTop: "1rem" }}>Loading Products</Typography>
                 </div> :
-                <Grid container spacing={2} sx={{ padding: "3rem 4rem" }} >
-                  {
-                    products && products.map(product => (
-                      <Grid item md={3} sm={6} xs={12} key={product._id} >
-                        <ProductCard product={product} />
-                      </Grid>
-                    ))
+                (products.length === 0 ?
+                  <Grid container sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "50vh" }}>
+                    <SentimentDissatisfied />
+                    <Typography variant="p" sx={{ marginTop: "1rem" }}>No Products found</Typography>
+                  </Grid> :
+                  (
+                    <Grid container spacing={2} sx={{ padding: "3rem 4rem" }} >
+                      {
+                        products && products.map(product => (
+                          <Grid item md={3} sm={6} xs={12} key={product._id} >
+                            <ProductCard
+                              product={product}
+                              handleAddToCart={() => addToCart(
+                                localStorage.getItem("token"),
+                                fetchedCart,
+                                products,
+                                product._id,
+                                1,
+                                { preventDuplicate: true }
+                              )} />
+                          </Grid>
+                        ))
 
-                  }
-                </Grid>}
-
-            {
-              error ? <Grid container sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "50vh" }}>
-                <SentimentDissatisfied />
-                <Typography variant="p" sx={{ marginTop: "1rem" }}>{error}</Typography>
-              </Grid> : ""
+                      }
+                    </Grid>
+                  ))
             }
+
+            {/* {
+              error === true && products.length === 0 ? <Grid container sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "50vh" }}>
+                <SentimentDissatisfied />
+                <Typography variant="p" sx={{ marginTop: "1rem" }}>No Products found</Typography>
+              </Grid> : null
+            } */}
 
           </Box>
         </Grid>
@@ -346,7 +378,7 @@ const Products = () => {
           localStorage.getItem("username") ?
             <Grid item md={4} xs={12} sx={{ md: { width: "25%", }, backgroundColor: "#E9F5E1", height: "100vh" }}>
               <Box >
-                <Cart products={products} handleQuantity={addToCart} />
+                <Cart products={products} items={cartList} handleQuantity={addToCart} />
 
               </Box>
             </Grid> :
