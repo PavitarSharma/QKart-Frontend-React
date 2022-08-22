@@ -4,7 +4,7 @@ import {
   ShoppingCart,
   ShoppingCartOutlined,
 } from "@mui/icons-material";
-import { Button, IconButton, Stack } from "@mui/material";
+import { Button, IconButton, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 import { useHistory } from "react-router-dom";
@@ -47,7 +47,36 @@ import "./Cart.css";
  *    Array of objects with complete data on products in cart
  *
  */
+
+
 export const generateCartItemsFrom = (cartData, productsData) => {
+  console.log(cartData, productsData)
+
+  const productId = cartData.map(item => {
+    return item.productId
+  })
+
+  const filteredProducts = productsData.filter(product => {
+    return productId.includes(product._id)
+  })
+
+  const cartItems = filteredProducts.map((data, index) => {
+    return {
+      name: data.name,
+      qty: cartData[index].dty,
+      category: data.category,
+      cost: data.cost,
+      rating: data.rating,
+      image: data.image,
+      productId: data._id
+    }
+  })
+
+  console.log(cartItems);
+  return cartItems
+
+
+
 };
 
 /**
@@ -61,6 +90,18 @@ export const generateCartItemsFrom = (cartData, productsData) => {
  *
  */
 export const getTotalCartValue = (items = []) => {
+  const totalValue = items.reduce((sum, item) => {
+    return sum + item.cost * item.qty
+  }, 0)
+
+  return totalValue
+};
+
+export const getTotalItems = (items = []) => {
+  const totalQty = items.reduce((sum, ele) => {
+    return sum + ele.qty;
+  }, 0);
+  return totalQty;
 };
 
 
@@ -116,8 +157,9 @@ const Cart = ({
   products,
   items = [],
   handleQuantity,
+  isReadOnly = false
 }) => {
-
+  const history = useHistory()
   if (!items.length) {
     return (
       <Box className="cart empty">
@@ -133,6 +175,73 @@ const Cart = ({
     <>
       <Box className="cart">
         {/* TODO: CRIO_TASK_MODULE_CART - Display view for each cart item with non-zero quantity */}
+        {items.map((ele) => {
+          return (
+            <Box
+              display="flex"
+              alignItems="flex-start"
+              padding="1rem"
+              key={ele.productId}
+            >
+              <Box className="image-container">
+                <img
+                  // Add product image
+                  src={ele.image}
+                  // Add product name as alt eext
+                  alt={ele.name}
+                  width="100%"
+                  height="100%"
+                />
+              </Box>
+              <Box
+                display="flex"
+                flexDirection="column"
+                justifyContent="space-between"
+                height="6rem"
+                paddingX="1rem"
+              >
+                <div>{/* Add product name */ ele.name}</div>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  {!isReadOnly ? (
+                    <ItemQuantity
+                      value={ele.qty}
+                      handleAdd={() => {
+                        handleQuantity(
+                          localStorage.getItem("token"),
+                          items,
+                          products,
+                          ele.productId,
+                          ele.qty + 1
+                        );
+                      }}
+                      handleDelete={() => {
+                        handleQuantity(
+                          localStorage.getItem("token"),
+                          items,
+                          products,
+                          ele.productId,
+                          ele.qty - 1
+                        );
+                      }}
+                    // Add required props by checking implementation
+                    />
+                  ) : (
+                    <Box padding="0.5rem" data-testid="item-qty">
+                      Qty: {ele.qty}
+                    </Box>
+                  )}
+                  <Box padding="0.5rem" fontWeight="700">
+                    ${/* Add product cost */ ele.cost}
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          );
+        })}
         <Box
           padding="1rem"
           display="flex"
@@ -152,18 +261,47 @@ const Cart = ({
             ${getTotalCartValue(items)}
           </Box>
         </Box>
-
-        <Box display="flex" justifyContent="flex-end" className="cart-footer">
-          <Button
-            color="primary"
-            variant="contained"
-            startIcon={<ShoppingCart />}
-            className="checkout-btn"
-          >
-            Checkout
-          </Button>
-        </Box>
+        {!isReadOnly && (
+          <Box display="flex" justifyContent="flex-end" className="cart-footer">
+            <Button
+              color="primary"
+              variant="contained"
+              startIcon={<ShoppingCart />}
+              className="checkout-btn"
+              onClick={(e) => history.push("/checkout")}
+            >
+              Checkout
+            </Button>
+          </Box>
+        )}
       </Box>
+      {isReadOnly && (
+        <Box padding="1rem" className="cart">
+          <Typography variant="h5" fontWeight="700" mb={2}>
+            Order Details
+          </Typography>
+          <Box display="flex" justifyContent="space-between" mb={1}>
+            <Typography> Products </Typography>
+            <Typography>{getTotalItems(items)}</Typography>
+          </Box>
+          <Box display="flex" justifyContent="space-between" mb={1}>
+            <Typography>Subtotal</Typography>
+            <Typography>${getTotalCartValue(items)} </Typography>
+          </Box>
+          <Box display="flex" justifyContent="space-between" mb={2}>
+            <Typography>Shipping Charges</Typography>
+            <Typography>$0</Typography>
+          </Box>
+          <Box display="flex" justifyContent="space-between" mb={2}>
+            <Typography variant="h6" fontWeight="700">
+              Total
+            </Typography>
+            <Typography variant="h6" fontWeight="700">
+              ${getTotalCartValue(items) + 0}
+            </Typography>
+          </Box>
+        </Box>
+      )}
     </>
   );
 };
