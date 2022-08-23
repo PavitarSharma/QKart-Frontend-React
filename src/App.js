@@ -3,6 +3,7 @@ import Login from "./components/Login";
 import { Switch, Route } from "react-router-dom";
 import Register from "./components/Register";
 import Product from "./components/Products"
+// eslint-disable-next-line
 import ipConfig from "./ipConfig.json";
 import theme from "./theme";
 import Checkout from "./components/Checkout"
@@ -12,11 +13,11 @@ import React, { useEffect, useState } from "react"
 
 
 export const config = {
-  endpoint: `http://${ipConfig.workspaceIp}:8082/api/v1`,
+  endpoint: `https://crio-qkart-backend-app.herokuapp.com/api/v1`,
 };
 
 function App() {
-  
+
 
   return (
     <React.StrictMode>

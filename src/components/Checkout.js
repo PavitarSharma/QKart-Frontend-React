@@ -428,7 +428,7 @@ const Checkout = () => {
   const performCheckout = async (token, items, addresses) => {
     if (validateRequest(items, addresses)) {
       try {
-
+          // eslint-disable-next-line
         const response = await axios.post(`${config.endpoint}/cart/checkout`, { "addressId": addresses.selected }, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -480,8 +480,8 @@ const Checkout = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  console.log(addresses)
-  console.log(addresses.all);
+  //console.log(addresses)
+  //console.log(addresses.all);
 
   return (
     <>
