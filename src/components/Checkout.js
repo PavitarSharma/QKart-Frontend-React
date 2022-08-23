@@ -95,7 +95,7 @@ const AddNewAddressView = ({
         multiline
         minRows={4}
         placeholder="Enter your complete address"
-        onChange={(e) => { handleNewAddress({ ...newAddress, value: e.target.value }) }}
+        onChange={(e) => { handleNewAddress({ ...newAddress, isAddingNewAddress: true, value: e.target.value }) }}
       />
       <Stack direction="row" my="1rem">
         <Button
@@ -125,6 +125,7 @@ const Checkout = () => {
     isAddingNewAddress: false,
     value: "",
   });
+
 
   // Fetch the entire products list
   const getProducts = async () => {
@@ -200,7 +201,7 @@ const Checkout = () => {
       enqueueSnackbar("You must be logged in to access checkout page", { variant: "error" })
 
       history.push("/login")
-      return null
+      //return null
     };
 
     try {
@@ -209,6 +210,7 @@ const Checkout = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+      console.log(response.data);
 
       setAddresses({ ...addresses, all: response.data });
       return response.data;
@@ -260,14 +262,14 @@ const Checkout = () => {
   const addAddress = async (token, newAddress) => {
     try {
       // TODO: CRIO_TASK_MODULE_CHECKOUT - Add new address to the backend and display the latest list of addresses
-      const response = await axios.post(`${config.endpoint}/user/addresses`,{"address":newAddress.value}, {
+      const response = await axios.post(`${config.endpoint}/user/addresses`, { "address": newAddress.value }, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
       setNewAddress({ ...newAddress, isAddingNewAddress: false })
-      setNewAddress({ ...newAddress, value: '' })
+      // setNewAddress({ ...newAddress, value: '' })
       setAddresses({ ...addresses, all: response.data })
       return response.data
 
@@ -433,16 +435,16 @@ const Checkout = () => {
           },
         });
 
-        if (response.data) {
-          localStorage.setItem('balance', localStorage.getItem("balance") - getTotalCartValue(items))
-          enqueueSnackbar(
-            "Order placed successfully",
-            {
-              variant: "success",
-            }
-          );
-          history.push("/thanks")
-        }
+        //   if (response.data) {
+        localStorage.setItem('balance', localStorage.getItem("balance") - getTotalCartValue(items))
+        enqueueSnackbar(
+          "Order placed successfully",
+          {
+            variant: "success",
+          }
+        );
+        history.push("/thanks")
+        // }
 
       } catch (error) {
         if (error.response) {
@@ -478,6 +480,8 @@ const Checkout = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  console.log(addresses)
+  console.log(addresses.all);
 
   return (
     <>
@@ -502,24 +506,26 @@ const Checkout = () => {
                     No addresses found for this account. Please add one to proceed
                   </Typography> :
                   addresses.all.map(data => (
-                    <Box
-                      className="address-item"
-                      key={data._id}
-                      onClick={(e) => {
-                        setAddresses((currAddress) => ({
-                          ...currAddress,
-                          selected: data._id,
-                        }))
-                      }}>
-                      <Typography>{data.address}</Typography>
-                      <Button
-                        variant="text"
-                        startIcon={<Delete />}
-                        onClick={event => { deleteAddress(token, data._id) }}
-                      >
-                        DELETE
-                      </Button>
-                    </Box>
+                    <>
+                      <Box
+                        className={`address-item ${addresses.selected ? "selected" : "not-selected"}`}
+                        key={data._id}
+                        onClick={(e) => {
+                          setAddresses((currAddress) => ({
+                            ...currAddress,
+                            selected: data._id,
+                          }))
+                        }}>
+                        <Typography variant="p">{data.address}</Typography>
+                        <Button
+                          variant="text"
+                          startIcon={<Delete />}
+                          onClick={event => { deleteAddress(token, data._id) }}
+                        >
+                          DELETE
+                        </Button>
+                      </Box>
+                    </>
                   ))
               }
 
@@ -528,7 +534,7 @@ const Checkout = () => {
             {/* TODO: CRIO_TASK_MODULE_CHECKOUT - Dislay either "Add new address" button or the <AddNewAddressView> component to edit the currently selected address */}
             {
               !newAddress.isAddingNewAddress ?
-                <Button
+                (<Button
                   color="primary"
                   variant="contained"
                   id="add-new-btn"
@@ -541,13 +547,13 @@ const Checkout = () => {
                   }}
                 >
                   Add new address
-                </Button> :
-                <AddNewAddressView
+                </Button>) :
+                (<AddNewAddressView
                   token={token}
                   newAddress={newAddress}
                   handleNewAddress={setNewAddress}
                   addAddress={addAddress}
-                />
+                />)
             }
 
 
@@ -571,7 +577,7 @@ const Checkout = () => {
             <Button
               startIcon={<CreditCard />}
               variant="contained"
-              onClick={() => {performCheckout(token, items, addresses)}}>
+              onClick={() => { performCheckout(token, items, addresses) }}>
               PLACE ORDER
             </Button>
           </Box>
