@@ -5,6 +5,8 @@ import Register from "./components/Register";
 import Product from "./components/Products"
 import ipConfig from "./ipConfig.json";
 import theme from "./theme";
+import Checkout from "./components/Checkout"
+import Thanks from "./components/Thanks"
 // eslint-disable-next-line
 import React, { useEffect, useState } from "react"
 
@@ -25,6 +27,8 @@ function App() {
             <Route exact path="/" component={Product} />
             <Route path="/register" component={Register} />
             <Route path="/login" component={Login} />
+            <Route path="/checkout" component={Checkout} />
+            <Route path="/thanks" component={Thanks} />
           </Switch>
         </div>
       </ThemeProvider>

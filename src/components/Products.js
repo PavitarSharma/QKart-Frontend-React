@@ -161,7 +161,8 @@ const Products = () => {
       // console.log("inside useeffect",fetchedcart,res)
     };
     callApi();
-
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
 
