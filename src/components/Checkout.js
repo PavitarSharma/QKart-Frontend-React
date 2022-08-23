@@ -506,26 +506,26 @@ const Checkout = () => {
                     No addresses found for this account. Please add one to proceed
                   </Typography> :
                   addresses.all.map(data => (
-                    <>
-                      <Box
-                        className={`address-item ${addresses.selected ? "selected" : "not-selected"}`}
-                        key={data._id}
-                        onClick={(e) => {
-                          setAddresses((currAddress) => ({
-                            ...currAddress,
-                            selected: data._id,
-                          }))
-                        }}>
-                        <Typography variant="p">{data.address}</Typography>
-                        <Button
-                          variant="text"
-                          startIcon={<Delete />}
-                          onClick={event => { deleteAddress(token, data._id) }}
-                        >
-                          DELETE
-                        </Button>
-                      </Box>
-                    </>
+
+                    <Box
+                      className={`address-item ${addresses.selected ? "selected" : "not-selected"}`}
+                      key={data._id}
+                      onClick={(e) => {
+                        setAddresses((currAddress) => ({
+                          ...currAddress,
+                          selected: data._id,
+                        }))
+                      }}>
+                      <Typography variant="p">{data.address}</Typography>
+                      <Button
+                        variant="text"
+                        startIcon={<Delete />}
+                        onClick={event => { deleteAddress(token, data._id) }}
+                      >
+                        DELETE
+                      </Button>
+                    </Box>
+
                   ))
               }
 
