@@ -342,7 +342,7 @@ const Products = () => {
                     <Typography variant="p" sx={{ marginTop: "1rem" }}>No Products found</Typography>
                   </Grid> :
                   (
-                    <Grid container spacing={2} sx={{ padding: "3rem 4rem" }} >
+                    <Grid container spacing={2} sx={{ padding: "3rem 1rem" }} >
                       {
                         products && products.map(product => (
                           <Grid item md={3} sm={6} xs={12} key={product._id} >
@@ -377,7 +377,7 @@ const Products = () => {
         {/* Cart */}
         {
           localStorage.getItem("username") ?
-            <Grid item md={4} xs={12} sx={{ md: { width: "25%", }, backgroundColor: "#E9F5E1", height: "100vh" }}>
+            <Grid item md={4} xs={12} sx={{ md: { width: "25%" }, backgroundColor: "#E9F5E1", height: "100vh", marginTop: "18px" }}>
               <Box >
                 <Cart products={products} items={cartList} handleQuantity={addToCart} />
 

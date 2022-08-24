@@ -18,7 +18,7 @@ const Header = ({ children, hasHiddenAuthButtons }) => {
   const explore = () => {
     history.push("/");
   };
-  
+
   const logout = () => {
     localStorage.clear();
     // localStorage.removeItem("token");

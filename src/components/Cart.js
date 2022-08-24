@@ -4,7 +4,7 @@ import {
   ShoppingCart,
   ShoppingCartOutlined,
 } from "@mui/icons-material";
-import { Button, IconButton, Stack } from "@mui/material";
+import { Button, IconButton, Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
 import { useHistory } from "react-router-dom";
@@ -174,72 +174,77 @@ const Cart = ({
   return (
     <>
       <Box className="cart">
+        <Box sx={{ margin: "10px 0 0 10px"}}>
+          <Typography variant="h6">{items.length} {items.length > 1 ? "items" : "item"} in Cart</Typography>
+        </Box>
         {/* TODO: CRIO_TASK_MODULE_CART - Display view for each cart item with non-zero quantity */}
         {items.map((item) => {
           return (
-            <Box
-              display="flex"
-              alignItems="flex-start"
-              padding="1rem"
-              key={item.productId}
-            >
-              <Box className="image-container">
-                <img
-                  // Add product image
-                  src={item.image}
-                  // Add product name as alt eext
-                  alt={item.name}
-                  width="100%"
-                  height="100%"
-                />
-              </Box>
+            <>
               <Box
                 display="flex"
-                flexDirection="column"
-                justifyContent="space-between"
-                height="6rem"
-                paddingX="1rem"
+                alignItems="flex-start"
+                padding="1rem"
+                key={item.productId}
               >
-                <div>{item.name}</div>
+                <Box className="image-container">
+                  <img
+                    // Add product image
+                    src={item.image}
+                    // Add product name as alt eext
+                    alt={item.name}
+                    width="100%"
+                    height="100%"
+                  />
+                </Box>
                 <Box
                   display="flex"
+                  flexDirection="column"
                   justifyContent="space-between"
-                  alignItems="center"
+                  height="6rem"
+                  paddingX="1rem"
                 >
-                  {!isReadOnly ? (
-                    <ItemQuantity
-                      value={item.qty}
-                      handleAdd={() => {
-                        handleQuantity(
-                          localStorage.getItem("token"),
-                          items,
-                          products,
-                          item.productId,
-                          item.qty + 1
-                        );
-                      }}
-                      handleDelete={() => {
-                        handleQuantity(
-                          localStorage.getItem("token"),
-                          items,
-                          products,
-                          item.productId,
-                          item.qty - 1
-                        );
-                      }}
-                    // Add required props by checking implementation
-                    />
-                  ) : (
-                    <Box padding="0.5rem" data-testid="item-qty">
-                      Qty: {item.qty}
+                  <div>{item.name}</div>
+                  <Box
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
+                    {!isReadOnly ? (
+                      <ItemQuantity
+                        value={item.qty}
+                        handleAdd={() => {
+                          handleQuantity(
+                            localStorage.getItem("token"),
+                            items,
+                            products,
+                            item.productId,
+                            item.qty + 1
+                          );
+                        }}
+                        handleDelete={() => {
+                          handleQuantity(
+                            localStorage.getItem("token"),
+                            items,
+                            products,
+                            item.productId,
+                            item.qty - 1
+                          );
+                        }}
+                      // Add required props by checking implementation
+                      />
+                    ) : (
+                      <Box padding="0.5rem" data-testid="item-qty">
+                        Qty: {item.qty}
+                      </Box>
+                    )}
+                    <Box padding="0.5rem" fontWeight="700">
+                      ${item.cost}
                     </Box>
-                  )}
-                  <Box padding="0.5rem" fontWeight="700">
-                    ${item.cost}
                   </Box>
                 </Box>
               </Box>
-            </Box>
+            </>
           );
         })}
         <Box
@@ -275,10 +280,56 @@ const Cart = ({
             </Button>
           </Box>
         )}
-       
+
       </Box>
 
-     
+      {isReadOnly ? (
+        <Box padding="1rem" paddingY="0.5rem" className="cart">
+          <Box>
+            <h3>Order Details</h3>
+          </Box>
+
+          <Box
+            display="flex"
+            alignItems="flex-start"
+            justifyContent="space-between"
+            paddingY="0.5rem"
+          >
+            <Box>Products</Box>
+            <Box>{getTotalItems(items)}</Box>
+          </Box>
+          <Box
+            display="flex"
+            alignItems="flex-start"
+            justifyContent="space-between"
+            paddingY="0.5rem"
+          >
+            <Box>Subtotal</Box>
+            <Box>${getTotalCartValue(items)}</Box>
+          </Box>
+          <Box
+            display="flex"
+            alignItems="flex-start"
+            justifyContent="space-between"
+            paddingY="0.5rem"
+          >
+            <Box>Shipping Charges</Box>
+            <Box>$0</Box>
+          </Box>
+          <Box
+            display="flex"
+            alignItems="flex-start"
+            justifyContent="space-between"
+            fontWeight="700"
+            paddingTop="0.5rem"
+          >
+            <Box>Total</Box>
+            <Box>${getTotalCartValue(items)}</Box>
+          </Box>
+        </Box>
+      ) : null}
+
+
     </>
   );
 };

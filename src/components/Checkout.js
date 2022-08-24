@@ -95,18 +95,17 @@ const AddNewAddressView = ({
         multiline
         minRows={4}
         placeholder="Enter your complete address"
-        onChange={(e) => { handleNewAddress({ ...newAddress, isAddingNewAddress: true, value: e.target.value }) }}
+        onChange={(e) => handleNewAddress({ ...newAddress, isAddingNewAddress: true, value: e.target.value })}
       />
       <Stack direction="row" my="1rem">
         <Button
           variant="contained"
-          onClick={() => { addAddress(token, newAddress) }}
-        >
+          onClick={() => addAddress(token, newAddress)}>
           Add
         </Button>
         <Button
           variant="text"
-          onClick={() => { handleNewAddress({ ...newAddress, isAddingNewAddress: false }) }}>
+          onClick={() => handleNewAddress({ ...newAddress, isAddingNewAddress: false })}>
           Cancel
         </Button>
       </Stack>
@@ -428,7 +427,7 @@ const Checkout = () => {
   const performCheckout = async (token, items, addresses) => {
     if (validateRequest(items, addresses)) {
       try {
-          // eslint-disable-next-line
+        // eslint-disable-next-line
         const response = await axios.post(`${config.endpoint}/cart/checkout`, { "addressId": addresses.selected }, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -468,17 +467,31 @@ const Checkout = () => {
   useEffect(() => {
     const onLoadHandler = async () => {
       const productsData = await getProducts();
-      const address = await getAddresses(token)
+
       const cartData = await fetchCart(token);
 
       if (productsData && cartData) {
         const cartDetails = await generateCartItemsFrom(cartData, productsData);
         setItems(cartDetails);
       }
+
     };
     onLoadHandler();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (token) {
+      getAddresses(token);
+    } else {
+      enqueueSnackbar("You must be logged in to access checkout page", {
+        variant: "warning",
+      });
+      history.push("/");
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
 
   //console.log(addresses)
   //console.log(addresses.all);
@@ -508,9 +521,14 @@ const Checkout = () => {
                   addresses.all.map(data => (
 
                     <Box
-                      className={`address-item ${addresses.selected ? "selected" : "not-selected"}`}
+                      className={
+                        addresses.selected === data._id
+                          ? "address-item selected"
+                          : "address-item not-selected"
+                      }
+                      
                       key={data._id}
-                      onClick={(e) => {
+                      onClick={() => {
                         setAddresses((currAddress) => ({
                           ...currAddress,
                           selected: data._id,
@@ -520,7 +538,7 @@ const Checkout = () => {
                       <Button
                         variant="text"
                         startIcon={<Delete />}
-                        onClick={event => { deleteAddress(token, data._id) }}
+                        onClick={async () => await deleteAddress(token, data._id)}
                       >
                         DELETE
                       </Button>
@@ -577,7 +595,7 @@ const Checkout = () => {
             <Button
               startIcon={<CreditCard />}
               variant="contained"
-              onClick={() => { performCheckout(token, items, addresses) }}>
+              onClick={() => performCheckout(token, items, addresses)}>
               PLACE ORDER
             </Button>
           </Box>
